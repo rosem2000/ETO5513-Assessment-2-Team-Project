@@ -10,17 +10,10 @@ output:
     theme: journal
     highlight: kate
 bibliography: references.bib # ChatGPT (2024)
-# add nocite field so that references for R packages are still generated even though they are not explicitly cited in the report text
+# Add nocite field so that references for R packages are still generated even though they are not explicitly cited in the report text
 nocite: | 
-  @R-knitr
-  @R-rmarkdown
-  @knitr2015
-  @knitr2014
-  @rmarkdown2018
-  @rmarkdown2020
-  @chatgpt
-  @R-base
-csl: apa.csl #to cite APA style for Monash guidelines
+  @*
+csl: apa.csl # To cite APA style for Monash guidelines
 ---
 
 ```{r setup, include=FALSE}
@@ -39,11 +32,56 @@ knitr::opts_chunk$set(fig.path = "Figures/", fig.align = "center", out.width = "
     library(gridExtra)
     library(readxl)
     library(plotly)
+    library(lubridate)
 ```
 
 ## Introduction
 
-## Analysis Megan
+## Analysis - Megan O'Rorke
+
+With **21%** of all trips in Melbourne being walked [@walkmatters], this makes walking the second most popular mode of transportation after driving.
+
+Utilising the subset of [@peddata], this section of analysis will explore the below research questions to highlight prevalent trends within Melbourne pedestrian traffic from August 2023 to August 2025.
+
+- **Does pedestrian traffic in Melbourne experience annual seasonality?**
+- **How has Melbourne pedestrian traffic changed over time?** 
+- **Which are the busiest locations in Melbourne for pedestrian traffic?**
+
+### Seasonality
+
+```{r load-the-data, echo = FALSE, warning = FALSE, message = FALSE}
+ped_data_megan <- read_xlsx("./Data/ped_data.xlsx")
+```
+
+```{r clean-data, echo = TRUE, warning = FALSE, message = FALSE}
+# Convert Sensing_Date column to date format for analysis (Sanderson 2024)
+ped_data_megan1 <- ped_data_megan %>%
+  mutate(Sensing_Date = date(Sensing_Date)) %>%
+# Create Month and Year columns derived from the Sensing_Date values
+  mutate(Month = month(Sensing_Date, label=TRUE), 
+         Year = year(Sensing_Date)) %>%
+# Create a season column by grouping each month into Summer, Autumn, Winter or Spring
+  mutate(Season = ifelse(Month %in% c("Jan", "Feb", "Dec"), "Summer", 
+                  ifelse(Month %in% c("Mar", "Apr", "May"), "Autumn", 
+                  ifelse(Month %in% c("Jun", "Jul", "Aug"), "Winter", 
+                  ifelse(Month %in% c("Sep", "Oct", "Nov"), "Spring", NA)))))
+```
+
+```{r seasonal-totals, echo = FALSE, warning = FALSE, message = FALSE}
+# Create Seasonal_Peds total sum for analysis
+seasonal_totals <- ped_data_megan1 %>%
+  group_by(Year, Season) %>%
+  summarise(Seasonal_Peds = sum(Total_Peds, na.rm=TRUE), .groups = "drop") %>%
+  arrange(Year, Season)
+# Create a table of the seasonal_totals and add caption
+knitr::kable(seasonal_totals, caption = "Total Melbourne Pedestrians Per Season (all sensor locations), 2023-2025")
+```
+
+
+
+### Pedestrian Traffic Over Time
+
+### Busiest Melbourne Locations
 
 ## Analysis Aldwin
 
