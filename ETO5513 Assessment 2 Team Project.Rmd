@@ -209,7 +209,7 @@ ped_data_map <- ped_data_megan1 %>%
   summarise(Total_Peds = sum(Total_Peds, na.rm=TRUE), .groups = "drop")
 
 # Use ggmap to plot lon and lat sensor points
-p <- ggmap(melb_map) +
+ggmap(melb_map) +
   # Use total_peds to colour the sensor points according to density, and also depict the size of the dot based on density
   geom_point(data = ped_data_map, aes(x = lon, y = lat, size = Total_Peds, color = Total_Peds)) +
   # Create axis labels and colour variation based on total pedestrians and dot size based on total pedestrians
@@ -219,9 +219,6 @@ p <- ggmap(melb_map) +
   scale_color_distiller(palette = "PuRd", labels = scales::label_comma()) +
   # Remove scientific notation of large pedestrian totals from the legend
   scale_size_continuous(range = c(1, 6), labels = label_comma())
-
-# Save png to Figures folder
-ggsave("Figures/pedestrian_map.png", plot = p, width = 10, height = 7, dpi = 300)
 ```
 In Figure \@ref(fig:total-ped-map), it is evident that the busiest sensor location in Melbourne is the intersection of Swanston Street and Flinders Lane, recording over **5 million** total pedestrians in 2025.
 
