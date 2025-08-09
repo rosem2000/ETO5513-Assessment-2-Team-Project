@@ -49,8 +49,10 @@ Utilising the subset of [@peddata], this section of analysis will explore the be
 
 ### Seasonality
 
+Does Melbourne's often unpredictable seasonal weather impact on pedestrian traffic trends? The dataset is reformatted, grouping each pedestrian reading into its associated year and season to analyse seasonality.
+
 ```{r load-the-data, echo = FALSE, warning = FALSE, message = FALSE}
-ped_data_megan <- read_xlsx("./Data/ped_data.xlsx")
+ped_data_megan <- read_xlsx("Data/ped_data.xlsx")
 ```
 
 ```{r clean-data, echo = TRUE, warning = FALSE, message = FALSE}
@@ -72,14 +74,50 @@ ped_data_megan1 <- ped_data_megan %>%
 seasonal_totals <- ped_data_megan1 %>%
   group_by(Year, Season) %>%
   summarise(Seasonal_Peds = sum(Total_Peds, na.rm=TRUE), .groups = "drop") %>%
+  # Create a factor of the Season column so seasons are displayed in correct order
+  mutate(Season = factor(Season, levels = c("Summer", "Autumn", "Winter", "Spring"))) %>%
   arrange(Year, Season)
 # Create a table of the seasonal_totals and add caption
 knitr::kable(seasonal_totals, caption = "Total Melbourne Pedestrians Per Season (all sensor locations), 2023-2025")
 ```
+In Table \@ref(tab:seasonal-totals) above, an annual trend can be observed whereby Melbourne pedestrian traffic reduces significantly in winter each year. 
 
+Autumn and spring return similar pedestrian levels to summer annually, however spring of 2023 significantly exceeded the summer pedestrian traffic in the same year. This may be attributed to the extremity of heat in summer discouraging pedestrians, or to many Melbournians vacationing over that period, disrupting regular work and school commuting patterns.
 
+*(Note: Summer of 2025 data is incomplete with only January included and winter of 2023 is incomplete with only August included in this dataset. Autumn of 2023 omitted from analysis.)*
+
+The bar chart below depicts the seasonal trends in pedestrian traffic over time, from 2023 to 2025.
+
+```{r stacked-bar-chart-seasonality, fig.cap = "Seasonality of Melbourne Pedestrian Traffic, 2023-2025", echo = TRUE, warning = FALSE, message = FALSE, out.width = "100%"}
+# Use ggplot to create basic plot
+# Plot year on x axis, value on y axis, and ensure the fill of bars is set to each measure
+stacked_bar_chart <- seasonal_totals %>%
+  group_by(Year, Season) %>%
+  ggplot(aes(x=Year, y=Seasonal_Peds, fill = Season)) +
+  # Set bar position to fill for the proportion of pedestrians each season
+  geom_bar(stat = "identity", position = "fill") +
+  labs(x = "Year", 
+       y = "Proportion of Pedestrians",
+       fill = "Season") +
+  # Set theme
+  theme_light()
+# Save basic plot to Figures folder
+ggsave(
+  filename = "figures/seasonality_bar_chart.png", 
+  plot = stacked_bar_chart,
+  width = 8,
+  height = 6,
+  dpi = 300)
+# Use ggplotly from plotly package to make plot interactive
+ggplotly(stacked_bar_chart)
+```
+In Figure \@ref(fig:stacked-bar-chart-seasonality), due to incomplete data observations for 2023 and 2025 it is difficult to comment on seasonality over time.
+
+From the complete 2024 seasonal data, it is observed that summer and autumn share the highest proportion of pedestrians, around 25.6%, with spring following closely at 25.2%. Whilst winter trails only by 1.7%, this does suggest a slight decline in pedestrian activity over the colder months.
 
 ### Pedestrian Traffic Over Time
+
+Has the volume of Melbourne pedestrian traffic decreased over time, particularly following the pandemic whereby many workplaces transitioned to hybrid or work from home arrangements? The dataset is reformatted, grouping each pedestrian reading into its associated year and month to analyse average traffic.
 
 ### Busiest Melbourne Locations
 
