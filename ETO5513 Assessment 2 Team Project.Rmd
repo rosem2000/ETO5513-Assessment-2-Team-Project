@@ -9,11 +9,36 @@ output:
     toc_float: true
     theme: journal
     highlight: kate
+bibliography: references.bib # ChatGPT (2024)
+# add nocite field so that references for R packages are still generated even though they are not explicitly cited in the report text
+nocite: | 
+  @R-knitr
+  @R-rmarkdown
+  @knitr2015
+  @knitr2014
+  @rmarkdown2018
+  @rmarkdown2020
+  @chatgpt
+  @R-base
+csl: apa.csl #to cite APA style for Monash guidelines
 ---
 
 ```{r setup, include=FALSE}
 # Set up figure rendering options for document
 knitr::opts_chunk$set(fig.path = "Figures/", fig.align = "center", out.width = "70%")
+```
+
+```{r loading-libraries, message = FALSE, warning = FALSE, echo = FALSE}
+# Load required libraries
+    library(rmarkdown)
+    library(knitr)
+    library(tidyverse)
+    library(readr)
+    library(kableExtra)
+    library(ggplot2)
+    library(gridExtra)
+    library(readxl)
+    library(plotly)
 ```
 
 ## Introduction
@@ -22,6 +47,6 @@ knitr::opts_chunk$set(fig.path = "Figures/", fig.align = "center", out.width = "
 
 ## Analysis Aldwin
 
-##Conclusion
+## Conclusion
 
 ## References
