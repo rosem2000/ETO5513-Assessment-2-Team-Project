@@ -228,6 +228,112 @@ Generally, the sensor locations closest to transportation hubs such as Flinders 
 
 ## Analysis Aldwin
 
+To further the investigative potential of the data set for practical application such as event planning, infrastructure prioritisation, and resource allocation, the below analysis will seek to answer:
+
+- **Can pedestrian data allow us to ascertain whether or not a major event in Melbourne had occurred?**
+- **Is volatility associated with pedestrian traffic? i.e. the busiest streets are due to the volatility in the traffic.** 
+
+### Predicting demands
+When Melbourne plays hosts to major events it would be expected that the pedestrian traffic would increase. By this logic the largest spikes in pedestrian traffic should also correspond with major events occurring in the city.
+
+```{r, echo = FALSE}
+# Importing data into dataframe
+df <- read_xlsx("Data/ped_data.xlsx") 
+
+# Creating new dataframe with only observations which are above 2 std dev of the average for that sensor and time
+spike_df <- df %>%
+  group_by(Sensor_Name, HourDay) %>%
+  mutate(
+    avg = mean(Total_Peds, na.rm = TRUE),
+    sd  = sd(Total_Peds, na.rm = TRUE),
+    spike_event = Total_Peds > avg + 2 * sd
+  )
+
+# Reducing data frame to dates of the top 15 observations above 2 std dev
+top_spike_dates <- spike_df %>%
+  filter(spike_event) %>%
+  group_by(Sensing_Date) %>%
+  summarise(spike_count = n(), .groups = "drop") %>%
+  arrange(desc(spike_count)) %>%
+  slice_head(n = 15)
+
+# Plotting dates of these against the number of 'spikes' recorded
+ggplot(top_spike_dates, aes(x = reorder(as.factor(Sensing_Date), spike_count), y = spike_count)) +
+  geom_col(fill = "black") +
+  coord_flip() +
+  labs(
+    title = "Top 15 Dates with Highest Pedestrian Spike Counts",
+    x = "Date",
+    y = "Number of Spikes"
+  ) +
+  theme_minimal()
+```
+
+The figure above shows the 15 dates with the most spikes in pedestrian traffic (where spikes are when a sensor detects pedestrian traffic above 2 standard deviations). As we can see there are some stand out dates which would be expected; 31 December and 1 January which co-inside with new year’s festivities. However, the other dates require a deeper dive to identify if there were any major events during those days. 
+January 1 2025 - New Years Day
+January 1 2024 - New Years Day
+December 31 2024 - New Years Eve
+Febuary 17 2024 - Taylor Swift Eras Concert
+Decemeber 14 2024 - No discernible major event/holiday
+December 31 2023 - New Years Eve
+Decemeber 16 2023 - No discernible major event/holiday
+March 15 2025 - Formula 1 Australian Grand Prix
+March 14 2025 - Formula 1 Australian Grand Prix
+Febuary 24 2025 - No discernible major event/holiday
+Febuary 18 2025 - No discernible major event/holiday
+December 23 2023 - No discernible major event/holiday
+December 15 2023 - No discernible major event/holiday
+December 21 2024 - No discernible major event/holiday; summer solstice
+March 9 2025 - Moomba Festival Sunday
+
+As we can observe a majority of the spiked traffic is a result of a major event occurring in Melbourne at the time which would invite foot traffic. However, there are some dates that do not appear to have any major events. That is not to say there is no causation for these spikes in foot traffic, but these causes may not be directly from major events e.g. roadworks causing upticks in foot traffic, multiple smaller events occurring simultaneously.
+
+### Volitiliy
+Often there is talk about whether our city can contain the demand of its people. However often these demands are needed sparingly and the cost versus benefit must be considered when it comes to expansion of footpaths, walking trails etc, is this the case when it comes to our busiest streets?
+
+```{r, echo = FALSE}
+# Importing data into dataframe
+df <- read_xlsx("Data/ped_data.xlsx") 
+
+# Creating dataframe with the standard deviation and mean of each sensor
+variability_df <- df %>%
+  group_by(Sensor_Name) %>%
+  summarise(
+    mean_count = mean(Total_Peds, na.rm = TRUE),
+    sd_count   = sd(Total_Peds, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Get top and bottom 15 observations of standard deviation
+top15 <- variability_df %>% arrange(desc(sd_count)) %>% slice_head(n = 15)
+bottom15 <- variability_df %>% arrange(sd_count) %>% slice_head(n = 15)
+
+# Combining top 15 and bottom 15 dataframes together
+combined_df <- bind_rows(top15, bottom15) %>%
+  arrange(sd_count) %>%
+  mutate(Sensor_Name = factor(Sensor_Name, levels = Sensor_Name)) %>%
+  pivot_longer(cols = c(mean_count, sd_count),
+               names_to = "metric", values_to = "value")
+
+# Plot
+ggplot(combined_df, aes(x = Sensor_Name, y = value, fill = metric)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  scale_fill_manual(
+    values = c("mean_count" = "orange", "sd_count" = "blue"),
+    labels = c("Mean", "Standard Deviation")
+  ) +
+  labs(
+    title = "Top 15 and Bottom 15 Sensor Locations by Volitility and Average traffic",
+    x = "Sensor",
+    y = "Count",
+    fill = "Metric"
+  ) +
+  theme_minimal()
+```  
+
+As observed in the chart below we can see the locations that have the highest average pedestrian traffic also have the highest volatility in their traffic. A possible explanation for this is high traffic locations may be situated near event venues, tourist areas, or transport hubs that experience irregular surges. In contrast, the bottom 10 locations have relatively stable traffic patterns, which may indicate they are in consistent commuter corridors or quieter areas. Additionally, the data collection occurred at different hours during the day, thus some of the high volatility can be explained by recording that occur when there is little traffic regardless of the area e.g. late at night, which would have a greater impact on variance for typically higher traffic areas.
+
 ## Conclusion
 
 ## References
