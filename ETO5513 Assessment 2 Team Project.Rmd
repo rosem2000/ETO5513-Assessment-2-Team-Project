@@ -9,19 +9,225 @@ output:
     toc_float: true
     theme: journal
     highlight: kate
+bibliography: references.bib # ChatGPT (2024)
+# Add nocite field so that references for R packages are still generated even though they are not explicitly cited in the report text
+nocite: | 
+  @*
+csl: apa.csl # To cite APA style for Monash guidelines
 ---
 
 ```{r setup, include=FALSE}
 # Set up figure rendering options for document
-knitr::opts_chunk$set(fig.path = "Figures/", fig.align = "center", out.width = "70%")
+knitr::opts_chunk$set(fig.path = "Figures/", fig.align = "center", out.width = "100%")
+```
+
+```{r loading-libraries, message = FALSE, warning = FALSE, echo = FALSE}
+# Load required libraries
+    library(rmarkdown)
+    library(knitr)
+    library(tidyverse)
+    library(readr)
+    library(kableExtra)
+    library(ggplot2)
+    library(gridExtra)
+    library(readxl)
+    library(plotly)
+    library(lubridate)
+    library(sf)
+    library(dplyr)
+    library(ggmap)
+    library(scales)
 ```
 
 ## Introduction
 
-## Analysis Megan
+## Analysis - Megan O'Rorke
+
+With **21%** of all trips in Melbourne being walked [@walkmatters], this makes walking the second most popular mode of transportation after driving.
+
+Utilising the subset of [@peddata], this section of analysis will explore the below research questions to highlight prevalent trends within Melbourne pedestrian traffic from August 2023 to August 2025.
+
+- **Does pedestrian traffic in Melbourne experience annual seasonality?**
+- **How has Melbourne pedestrian traffic changed over time?** 
+- **Which are the busiest locations in Melbourne for pedestrian traffic?**
+
+### Seasonality
+
+Does Melbourne's often unpredictable seasonal weather impact on pedestrian traffic trends? The dataset is reformatted, grouping each pedestrian observation into its associated year and season to analyse seasonality.
+
+```{r load-the-data, echo = FALSE, warning = FALSE, message = FALSE}
+ped_data_megan <- read_xlsx("Data/ped_data.xlsx")
+```
+
+```{r clean-data, echo = TRUE, warning = FALSE, message = FALSE}
+# Convert Sensing_Date column to date format for analysis (Sanderson 2024)
+ped_data_megan1 <- ped_data_megan %>%
+  mutate(Sensing_Date = date(Sensing_Date)) %>%
+# Create Month and Year columns derived from the Sensing_Date values
+  mutate(Month = month(Sensing_Date, label=TRUE), 
+         Year = year(Sensing_Date)) %>%
+# Create a season column by grouping each month into Summer, Autumn, Winter or Spring
+  mutate(Season = ifelse(Month %in% c("Jan", "Feb", "Dec"), "Summer", 
+                  ifelse(Month %in% c("Mar", "Apr", "May"), "Autumn", 
+                  ifelse(Month %in% c("Jun", "Jul", "Aug"), "Winter", 
+                  ifelse(Month %in% c("Sep", "Oct", "Nov"), "Spring", NA)))))
+```
+
+```{r seasonal-totals, echo = FALSE, warning = FALSE, message = FALSE}
+# Create Total_Peds sum for analysis
+seasonal_totals <- ped_data_megan1 %>%
+  group_by(Year, Season) %>%
+  summarise(Total_Peds = sum(Total_Peds, na.rm=TRUE), .groups = "drop") %>%
+  # Create a factor of the Season column so seasons are displayed in correct order
+  mutate(Season = factor(Season, levels = c("Summer", "Autumn", "Winter", "Spring"))) %>%
+  arrange(Year, Season)
+# Create a table of the seasonal_totals and add caption
+knitr::kable(seasonal_totals, caption = "Total Melbourne Pedestrians Per Season (all sensor locations), 2023-2025")
+```
+In Table \@ref(tab:seasonal-totals) above, the total number of pedestrians each season is depicted. An annual trend can be observed, whereby Melbourne pedestrian traffic reduces significantly in winter each year. Overall, Autumn of 2025 recorded the highest traffic, with **56,158,393** total pedestrians.
+
+Autumn and spring return similar annual pedestrian levels to summer, however spring of 2023 significantly exceeded the summer pedestrian traffic in the same year. This may be attributed to the extremity of heat in summer discouraging pedestrians, or that many Melbournians vacation over that period, disrupting regular work and school commuting patterns.
+
+*(Note: Summer of 2025 data is incomplete with only January included and winter of 2023 is incomplete with only August included in this dataset. Autumn of 2023 omitted from analysis.)*
+
+The bar chart below depicts the seasonal trends in pedestrian traffic over time, from 2023 to 2025.
+
+```{r stacked-bar-chart-seasonality, fig.cap = "Seasonality of Melbourne Pedestrian Traffic, 2023-2025", echo = TRUE, warning = FALSE, message = FALSE}
+# Use ggplot to create basic plot
+# Plot year on x axis, value on y axis, and ensure the fill of bars is set to each measure
+stacked_bar_chart <- seasonal_totals %>%
+  group_by(Year, Season) %>%
+  ggplot(aes(x=Year, y=Total_Peds, fill = Season)) +
+  # Set bar position to fill for the proportion of pedestrians each season
+  geom_bar(stat = "identity", position = "fill") +
+  labs(x = "Year", 
+       y = "Proportion of Total Pedestrians",
+       fill = "Season") +
+  # Set theme
+  theme_light()
+# Use ggplotly from plotly package to make plot interactive
+ggplotly(stacked_bar_chart)
+```
+In Figure \@ref(fig:stacked-bar-chart-seasonality), due to incomplete data observations for 2023 and 2025 it is difficult to comment on seasonality over time.
+
+From the complete 2024 seasonal data, it is observed that summer and autumn share the highest proportion of total pedestrians, around 25.6%, with spring following closely at 25.2%. Whilst winter trails only by 1.7%, this does suggest a slight decline in pedestrian activity over the colder months.
+
+### Pedestrian Traffic Over Time
+
+Has the volume of Melbourne pedestrian traffic decreased over time, particularly following the pandemic whereby 35 to 40 per cent of Australians are working remotely in 2025 [@SMH]? The dataset is reformatted, grouping each pedestrian observation into its associated year and month to analyse average traffic trends.
+
+```{r monthly-average-peds, echo = FALSE, warning = FALSE, message = FALSE}
+# Create Average_Peds for analysis
+monthly_average <- ped_data_megan1 %>%
+  group_by(Year, Month) %>%
+  summarise(Average_Peds = mean(Total_Peds, na.rm=TRUE), .groups = "drop")
+# Create a table of the monthly_average arranged from highest to lowest and add caption
+knitr::kable(monthly_average %>% 
+  # Arrange averages highest to lowest 
+  arrange(desc(Average_Peds)) %>% 
+  head(10), caption = "Average Monthly Melbourne Pedestrians Per Hour (all sensor locations), 2023-2025", digits = 2)
+```
+In Table \@ref(tab:monthly-average-peds) above, the ten months with the highest average pedestrians per hour are displayed. March 2024 returned the highest mean pedestrian traffic, recording an average of **442.29** pedestrians per hour.
+
+Of the top 10 months, 50% are in 2023, 30% are in 2024 and 20% are in 2025. This decline indicates a negative association between year and monthly average pedestrian traffic per hour, suggesting that environmental and cultural factors are impacting on pedestrian trends.
+
+The line plot below depicts the average monthly pedestrian traffic per hour, over time from 2023 to 2025.
+
+```{r line-plot-monthly, fig.cap = "Average Monthly Pedestrian Traffic (Per Hour), 2023-2025", echo = TRUE, warning = FALSE, message = FALSE}
+# Use ggplot to create line plot of the monthly average peds per hour
+line_plot <- monthly_average %>% 
+  # Transform Month into ordinal factor so each month is arranged in the correct order on x axis
+  mutate(Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))) %>%
+  # Use ggplot to plot month on x axis, average_peds on y axis, with separate lines for and colors for each year group
+  ggplot(aes(x=Month, y=Average_Peds, color=factor(Year), group=Year)) +
+  geom_line() +
+  geom_point() +
+  # Set axis and color labels
+  labs(x = "Month",
+    y = "Average Pedestrians (Per Hour)",
+    color = "Year") +
+  # Set different theme
+  theme_light()
+# Use ggplotly from plotly package to make plot interactive
+ggplotly(line_plot)
+```
+In Figure \@ref(fig:line-plot-monthly), the decline in monthly average pedestrian traffic per hour is evident from 2023 to 2025.
+
+June of 2025 recorded the lowest hourly pedestrian average, at **332.05**. Compared to June of 2024 at **351.74** average pedestrians per hour, this is a significant annual discrepancy. Declines may be attributed to changes in working and commuting culture in Melbourne over time, or highlight any environmental changes such as June of 2025 experiencing more rain and wind than June of 2024. 
+
+Overall, all months of 2024 recorded lower average hourly pedestrians than their 2023 counterparts, and similarly, all months of 2025 recorded deficits when compared to 2024, with the exception of July 2025. This supports the notion that remote working is becoming increasingly prevalent and may be a key contributor for decreased pedestrian traffic.
+
+### Busiest Melbourne Locations
+
+Which are the busiest sensor locations in Melbourne in 2025 for pedestrian traffic and do these popular sensors cluster around a common area? The dataset is reformatted, grouping each 2025 pedestrian observation into its associated sensor location to analyse pedestrian counts.
+
+```{r busiest-locations, echo = FALSE, warning = FALSE, message = FALSE}
+# Create Total_Peds for analysis
+busiest_locations <- ped_data_megan1 %>%
+  filter(Year == 2025) %>%
+  group_by(Sensor_Name) %>%
+  summarise(Total_Peds = sum(Total_Peds, na.rm=TRUE), .groups = "drop")
+# Create a table of the busiest_locations and add caption
+knitr::kable(busiest_locations %>% 
+  # Arrange total peds highest to lowest 
+  arrange(desc(Total_Peds)) %>%
+  head(10), caption = "Total Pedestrians Per Sensor Location, 2025")
+```
+In Table \@ref(tab:busiest-locations) above, the ten sensors with the highest total pedestrian traffic in 2025 are displayed. The Swa31 sensor has the highest total traffic at **5,659,735** pedestrians in 2025, significantly greater than the tenth most popular sensor, Bou688_T at **2,608,494** pedestrians.
+
+The popularity of locations is explored in the map plot below [@maps], depicting the total number of pedestrians per sensor location in 2025.
+
+```{r total-ped-map, fig.cap = "Total Pedestrians Per Sensor Location, 2025", echo = TRUE, warning = FALSE, message = FALSE}
+
+# Set Melbourne CBD center coordinates
+melb_cbd <- c(lon = 144.9631, lat = -37.8136)
+
+# Create bounding box coordinates (OpenAI 2024)
+bbox <- c(
+  left = melb_cbd["lon"] - 0.01,
+  bottom = melb_cbd["lat"] - 0.01,
+  right = melb_cbd["lon"] + 0.01,
+  top = melb_cbd["lat"] + 0.01
+)
+# Ensure bbox names are correct for get_stadiamap()
+names(bbox) <- c("left", "bottom", "right", "top")
+
+# Get a Stamen terrain map centered on Melbourne CBD (OpenAI 2024)
+melb_map <- get_stadiamap(
+  bbox = bbox,
+  zoom = 15,
+  maptype = "stamen_terrain"
+)
+
+# Filter pedestrian data for 2025 only, separate coords for mapping and calc total_peds
+ped_data_map <- ped_data_megan1 %>%
+  filter(Year == 2025) %>%
+  # Separate Location column into longitude and latitude values for mapping
+  separate(Location, into = c("lat", "lon"), sep= ", ", convert=TRUE) %>%
+  # Group by sensor location and sum total pedestrians
+  group_by(Sensor_Name, lat, lon) %>%
+  summarise(Total_Peds = sum(Total_Peds, na.rm=TRUE), .groups = "drop")
+
+# Use ggmap to plot lon and lat sensor points
+ggmap(melb_map) +
+  # Use total_peds to colour the sensor points according to density, and also depict the size of the dot based on density
+  geom_point(data = ped_data_map, aes(x = lon, y = lat, size = Total_Peds, color = Total_Peds)) +
+  # Create axis labels and colour variation based on total pedestrians and dot size based on total pedestrians. Add citing subtitle for map data
+  labs(x = "Longitude", y = "Latitude", color = "Total Pedestrian Count", size = "Total Pedestrian Count") +
+  theme_light() +
+  # Remove scientific notation of large pedestrian totals from the legend and set colour scheme
+  scale_color_distiller(palette = "PuRd", labels = scales::label_comma()) +
+  # Remove scientific notation of large pedestrian totals from the legend
+  scale_size_continuous(range = c(1, 6), labels = label_comma())
+```
+In Figure \@ref(fig:total-ped-map) [@stadiamaps] [@openmaptiles] [@openstreetmap], it is evident that the busiest sensor location in Melbourne is the intersection of Swanston Street and Flinders Lane, recording over **5 million** total pedestrians in 2025.
+
+Also recording over 5 million total pedestrians, is the Southbank Promenade sensor at the end of Southgate Avenue.
+
+Generally, the sensor locations closest to transportation hubs such as Flinders Street Station and Melbourne Central Station in central Melbourne have the highest pedestrian traffic counts in 2025, with sensors on the outskirts of the city recording < 1 million pedestrians. 
 
 ## Analysis Aldwin
 
-##Conclusion
+## Conclusion
 
 ## References
