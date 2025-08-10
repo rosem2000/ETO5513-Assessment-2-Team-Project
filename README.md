@@ -39,6 +39,7 @@ Megan O'Rorke
 [moro0003@student.monash.edu](mailto:moro0003@student.monash.edu)
 
 Aldwin Chong
+[acho0011@student.monash.edu](mailto:acho0011@student.monash.edu)
 
 ## Version History
 

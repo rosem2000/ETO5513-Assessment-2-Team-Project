@@ -1,6 +1,6 @@
 ---
 title: 'ETO5513 Assessment 2: Team Project'
-author: "Megan O'Rorke 35602287 & Aldwin Chong"
+author: "Megan O'Rorke 35602287 & Aldwin Chong 28892054"
 date: "`r format(Sys.Date(), '%d/%m/%Y')`"
 output:
   bookdown::html_document2:
@@ -352,7 +352,7 @@ ggplot(combined_df, aes(x = Sensor_Name, y = value, fill = metric)) +
   theme_minimal()
 ```  
 
-As observed in the chart below we can see the locations that have the highest average pedestrian traffic also have the highest volatility in their traffic. A possible explanation for this is high traffic locations may be situated near event venues, tourist areas, or transport hubs that experience irregular surges. In contrast, the bottom 10 locations have relatively stable traffic patterns, which may indicate they are in consistent commuter corridors or quieter areas. Additionally, the data collection occurred at different hours during the day, thus some of the high volatility can be explained by recording that occur when there is little traffic regardless of the area e.g. late at night, which would have a greater impact on variance for typically higher traffic areas.
+As observed in the chart below we can see the locations that have the highest average pedestrian traffic also have the highest volatility in their traffic. A possible explanation for this is high traffic locations may be situated near event venues, tourist areas, or transport hubs that experience irregular surges. In contrast, the bottom 10 locations have relatively stable traffic patterns, which may indicate they are stable commuter corridors or quieter areas. Additionally, the data collection occurred at different hours during the day, thus some of the high volatility can be explained by recording that occur when there is little traffic regardless of the area e.g. late at night, which would have a greater impact on variance for typically higher traffic areas.
 
 ## Conclusion
 
@@ -362,8 +362,10 @@ Despite seasonal conclusions being difficult to make due to incomplete data limi
 
 The monthly average pedestrian counts declined steadily over the data period, likely influenced by increasing remote work practices and evolving commuting patterns following the pandemic. 
 
-Spatial mapping of sensor data revealed that central Melbourne locations, such as the intersection of Swanston Street and Flinders Lane and Southbank Promenade, are major pedestrian hubs attracting the highest foot traffic. These insights contribute to understanding walking trends and can inform city planners aiming to enhance pedestrian infrastructure and safety. 
+Spatial mapping of sensor data revealed that central Melbourne locations, such as the intersection of Swanston Street and Flinders Lane and Southbank Promenade, are major pedestrian hubs attracting the highest foot traffic. These insights contribute to understanding walking trends and can inform city planners aiming to enhance pedestrian infrastructure and safety. Furthermore this locations tend to feature the greatest amounts of variation in the amount of pedestrians on any given day as they place a crucial role in circulating individuals during major events such as New Years or sporting events. Low-traffic areas show stable patterns, suggesting consistent usage and fewer sudden surges in pedestrian demand.
 
-Future studies should address current data gaps and incorporate additional factors such as weather variations or special events to more comprehensively model pedestrian behavior in Melbourne.
+As would be expected the volume of pedestrians spikes when major events occur, knowing this is crucial in allowing councils and regulators to make infrastructure adjustments to safety accommodate demand such as shutting down sections of roads to allow for more pedestrian traffic or conversion of streets permanently to walkways. Additionally, understanding these patterns would enable better deployment of public transport, crowd management resources, and event planning logistics to help ensure safety of pedestrians. 
+
+Future studies should address current data gaps and incorporate additional factors such as weather variations or special events to more comprehensively model pedestrian behavior in Melbourne. Additionally incorporating data in regards to roadworks and public transport disruptions would allow for a more detailed investigation on possible impacts to pedestrian density. 
 
 ## References
