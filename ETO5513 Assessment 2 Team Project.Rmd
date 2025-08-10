@@ -41,7 +41,7 @@ knitr::opts_chunk$set(fig.path = "Figures/", fig.align = "center", out.width = "
 
 ## Introduction
 
-In a recent global survey, Melbourne Australia ranked **sixteenth** in the most walkable cities worldwide [@walksurvey], demonstrating how deeply walking is ingrained in the city's culture. This report investigates the complexities within Melbourne pedestrian trends between August 2023 and August 2025, analysing seasonal variation, disruptions and changes over time and location-based travel patterns.
+In a recent global survey, Melbourne Australia ranked **sixteenth** in the most walkable cities worldwide [@walksurvey], demonstrating how deeply walking is ingrained in the city's culture. This report investigates the complexities within Melbourne pedestrian trends between August 2023 and August 2025, analysing seasonal variation, disruptions and changes over time and location-based travel patterns to assist in highlighting urban planning opportunities.
 
 Utilising a subset of the [City of Melbourne Pedestrian Counting System (counts per hour)](https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/export/) data [@peddata], the past 2-years of hourly walking traffic detected by Melbourne sensors from August 2023 to August 2025 will be explored. Each observation contains the following variables:
 
