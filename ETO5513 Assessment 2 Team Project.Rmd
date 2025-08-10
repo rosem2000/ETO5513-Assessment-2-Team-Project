@@ -250,4 +250,14 @@ Generally, the sensor locations closest to transportation hubs such as Flinders 
 
 ## Conclusion
 
+The analysis of Melbourne pedestrian traffic from August 2023 to August 2025 highlights notable seasonal, temporal and spatial trends. 
+
+Despite seasonal conclusions being difficult to make due to incomplete data limitations, it was evident that pedestrian activity drops significantly during winter months, while spring and autumn show consistently higher pedestrian volumes. Summer tends to experience volatility, which is likely attributed to environmental factors such as heatwaves, or cultural factors such as holiday and vacation trends typical for that season.
+
+The monthly average pedestrian counts declined steadily over the data period, likely influenced by increasing remote work practices and evolving commuting patterns following the pandemic. 
+
+Spatial mapping of sensor data revealed that central Melbourne locations, such as the intersection of Swanston Street and Flinders Lane and Southbank Promenade, are major pedestrian hubs attracting the highest foot traffic. These insights contribute to understanding walking trends and can inform city planners aiming to enhance pedestrian infrastructure and safety. 
+
+Future studies should address current data gaps and incorporate additional factors such as weather variations or special events to more comprehensively model pedestrian behavior in Melbourne.
+
 ## References
