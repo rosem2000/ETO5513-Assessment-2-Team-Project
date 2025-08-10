@@ -41,6 +41,30 @@ knitr::opts_chunk$set(fig.path = "Figures/", fig.align = "center", out.width = "
 
 ## Introduction
 
+In a recent global survey, Melbourne Australia ranked **sixteenth** in the most walkable cities worldwide [@walksurvey], demonstrating how deeply walking is ingrained in the city's culture. This report investigates the complexities within Melbourne pedestrian trends between August 2023 and August 2025, analysing seasonal variation, disruptions and changes over time and location-based travel patterns.
+
+Utilising a subset of the [City of Melbourne Pedestrian Counting System (counts per hour)](https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/export/) data [@peddata], the past 2-years of hourly walking traffic detected by Melbourne sensors from August 2023 to August 2025 will be explored. Each observation contains the following variables:
+
+```{r load-the-data, echo = FALSE, warning = FALSE, message = FALSE}
+ped_data_megan <- read_xlsx("Data/ped_data.xlsx")
+```
+
+```{r variables, echo = FALSE, warning = FALSE, message = FALSE}
+# Create table of variable names, types and a brief description
+knitr::kable(data.frame(
+  Variable = names(ped_data_megan),
+  # Ensure class is not returned as a matrix and is just returned as a single string per variable (OpenAI 2024)
+  Type = sapply(ped_data_megan, function(x) paste(class(x), collapse = "/")),
+  Description = c(
+    "ID number for sensor location",
+    "Date of observation",
+    "Hour of the day in which observation was recorded",
+    "Total number of pedestrians observed within the hour",
+    "Name of sensor location",
+    "Latitude and Longitude of sensor location"), row.names = NULL), caption = "Pedestrian Dataset Variables")
+```
+Within the subset of the Pedestrian Counting System data, there are **`r nrow(ped_data_megan)` observations** across **`r ncol(ped_data_megan)` variables**, as described in Table \@ref(tab:variables) above, with recordings dated from 8 August 2023 to 7 August 2025.
+
 ## Analysis - Megan O'Rorke
 
 With **21%** of all trips in Melbourne being walked [@walkmatters], this makes walking the second most popular mode of transportation after driving.
@@ -54,10 +78,6 @@ Utilising the subset of [@peddata], this section of analysis will explore the be
 ### Seasonality
 
 Does Melbourne's often unpredictable seasonal weather impact on pedestrian traffic trends? The dataset is reformatted, grouping each pedestrian observation into its associated year and season to analyse seasonality.
-
-```{r load-the-data, echo = FALSE, warning = FALSE, message = FALSE}
-ped_data_megan <- read_xlsx("Data/ped_data.xlsx")
-```
 
 ```{r clean-data, echo = TRUE, warning = FALSE, message = FALSE}
 # Convert Sensing_Date column to date format for analysis (Sanderson 2024)
