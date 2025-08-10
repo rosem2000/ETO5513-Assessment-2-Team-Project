@@ -161,19 +161,19 @@ Overall, all months of 2024 recorded lower average hourly pedestrians than their
 
 Which are the busiest sensor locations in Melbourne in 2025 for pedestrian traffic and do these popular sensors cluster around a common area? The dataset is reformatted, grouping each 2025 pedestrian observation into its associated sensor location to analyse pedestrian counts.
 
-```{r busiest_locations, echo = FALSE, warning = FALSE, message = FALSE}
+```{r busiest-locations, echo = FALSE, warning = FALSE, message = FALSE}
 # Create Total_Peds for analysis
 busiest_locations <- ped_data_megan1 %>%
   filter(Year == 2025) %>%
   group_by(Sensor_Name) %>%
   summarise(Total_Peds = sum(Total_Peds, na.rm=TRUE), .groups = "drop")
-# Create a table of the busiest_locations arranged from highest to lowest and add caption
+# Create a table of the busiest_locations and add caption
 knitr::kable(busiest_locations %>% 
   # Arrange total peds highest to lowest 
-  arrange(desc(Total_Peds)) %>% 
+  arrange(desc(Total_Peds)) %>%
   head(10), caption = "Total Pedestrians Per Sensor Location, 2025")
 ```
-In Table \@ref(tab:busiest_locations) above, the ten sensors with the highest total pedestrian traffic in 2025 are displayed. The Swa31 sensor has the highest total traffic at **5,659,735** pedestrians in 2025, significantly greater than the tenth most popular sensor, Bou688_T at **2,608,494** pedestrians.
+In Table \@ref(tab:busiest-locations) above, the ten sensors with the highest total pedestrian traffic in 2025 are displayed. The Swa31 sensor has the highest total traffic at **5,659,735** pedestrians in 2025, significantly greater than the tenth most popular sensor, Bou688_T at **2,608,494** pedestrians.
 
 The popularity of locations is explored in the map plot below [@maps], depicting the total number of pedestrians per sensor location in 2025.
 
@@ -212,7 +212,7 @@ ped_data_map <- ped_data_megan1 %>%
 ggmap(melb_map) +
   # Use total_peds to colour the sensor points according to density, and also depict the size of the dot based on density
   geom_point(data = ped_data_map, aes(x = lon, y = lat, size = Total_Peds, color = Total_Peds)) +
-  # Create axis labels and colour variation based on total pedestrians and dot size based on total pedestrians
+  # Create axis labels and colour variation based on total pedestrians and dot size based on total pedestrians. Add citing subtitle for map data
   labs(x = "Longitude", y = "Latitude", color = "Total Pedestrian Count", size = "Total Pedestrian Count") +
   theme_light() +
   # Remove scientific notation of large pedestrian totals from the legend and set colour scheme
@@ -220,11 +220,11 @@ ggmap(melb_map) +
   # Remove scientific notation of large pedestrian totals from the legend
   scale_size_continuous(range = c(1, 6), labels = label_comma())
 ```
-In Figure \@ref(fig:total-ped-map), it is evident that the busiest sensor location in Melbourne is the intersection of Swanston Street and Flinders Lane, recording over **5 million** total pedestrians in 2025.
+In Figure \@ref(fig:total-ped-map) [@stadiamaps] [@openmaptiles] [@openstreetmap], it is evident that the busiest sensor location in Melbourne is the intersection of Swanston Street and Flinders Lane, recording over **5 million** total pedestrians in 2025.
 
 Also recording over 5 million total pedestrians, is the Southbank Promenade sensor at the end of Southgate Avenue.
 
-Generally, the sensor locations closest to transportation hubs such as Flinders Street Station and Melbourne Central Station in central Melbourne have the highest pedestrian traffic counts in 2025, with sensors on the outskirts of the city recording > 1 million pedestrians. 
+Generally, the sensor locations closest to transportation hubs such as Flinders Street Station and Melbourne Central Station in central Melbourne have the highest pedestrian traffic counts in 2025, with sensors on the outskirts of the city recording < 1 million pedestrians. 
 
 ## Analysis Aldwin
 
